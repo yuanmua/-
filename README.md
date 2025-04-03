@@ -2,7 +2,7 @@
 ```
 glass_analysis/
 ├── config/
-│   ├──   
+│   ├── __init__.py
 │   ├── settings.py
 │   ├── urls.py
 │   └── wsgi.py
@@ -29,3 +29,5 @@ glass_analysis/
 ├── requirements.txt
 └── manage.py
 ```
+
+ python manage.py migrate

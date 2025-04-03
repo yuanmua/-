@@ -151,7 +151,7 @@ const marginData = {
         label: '平均毛利率',
         data: [
             {% for product, data in chart_data.predictions.items %}
-                {% if product == '钢化玻璃' %}0.42{% endif %}
+                {% if product == '钢化玻璃' %}0.42,{% endif %}
                 {% if product == '夹胶玻璃' %}0.48{% endif %}
             {% endfor %}
         ],

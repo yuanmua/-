@@ -70,17 +70,23 @@ DATABASES = {
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 1,  # 允许密码长度为 1
+        }
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    # },
 ]
 
 # Internationalization
@@ -95,3 +101,13 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 用户登录相关设置
+LOGIN_URL = 'sales:login'
+LOGIN_REDIRECT_URL = 'sales:dashboard'
+LOGOUT_REDIRECT_URL = 'sales:login'
+
+
+# 关闭邮箱验证
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # 可选：'mandatory'（强制验证）| 'optional'（可选验证）| 'none'（无验证）
+ACCOUNT_EMAIL_REQUIRED = False  # 邮箱非必填
