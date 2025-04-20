@@ -1,0 +1,92 @@
+{% extends 'sales/base.html' %}
+
+{% block content %}
+<div class="row">
+    <!-- 关键指标展示 -->
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">销售概览</h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="alert alert-primary">
+                            总销售额：¥{{ summary_data.total_sales|floatformat:2 }}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-success">
+                            平均利润率：{{ summary_data.avg_margin|floatformat:2 }}%
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-info">
+                            合作公司数：{{ summary_data.total_companies }}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-warning">
+                            冠军公司：{{ summary_data.top_company|default:'暂无' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 公司销售分布图表 -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <canvas id="companySalesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 时间趋势图表 -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <canvas id="salesTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 公司销售柱状图
+    new Chart(document.getElementById('companySalesChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ chart_data.company_names|safe }},
+            datasets: [{
+                label: '销售额',
+                data: {{ chart_data.company_sales|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.6)'
+            }]
+        }
+    });
+
+    // 销售趋势折线图
+    new Chart(document.getElementById('salesTrendChart'), {
+        type: 'line',
+        data: {
+            labels: {{ chart_data.time_labels|safe }},
+            datasets: [{
+                label: '历史销售额',
+                data: {{ chart_data.time_values|safe }},
+                borderColor: 'rgb(75, 192, 192)',
+                fill: false
+            }{% if chart_data.predictions %},
+            {
+                label: '预测销售额',
+                data: [...Array({{ chart_data.time_values|length }}).fill(null), ...{{ chart_data.predictions.values|safe }}],
+                borderColor: 'rgb(255, 99, 132)',
+                borderDash: [5,5],
+                fill: false
+            }{% endif %}]
+        }
+    });
+});
+</script>
+{% endblock %}

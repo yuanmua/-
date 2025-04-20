@@ -58,7 +58,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'glass_analysis',
         'USER': 'root',
-        'PASSWORD': '1',
+        'PASSWORD': '123s123s',
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {

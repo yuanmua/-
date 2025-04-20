@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, views_large_sales, views_company_sales
 
 app_name = 'sales'
 
@@ -17,4 +17,9 @@ urlpatterns = [
     path('users/', views.user_management, name='user_management'),  # 用户管理
     path('users/<int:user_id>/toggle-staff/', views.user_toggle_staff, name='user_toggle_staff'),  # 切换管理员状态
     path('users/<int:user_id>/delete/', views.user_delete, name='user_delete'),  # 删除用户
+
+    # 销售分析相关URL
+    path('large-sales/', views_large_sales.large_sales_analysis, name='large_sales_analysis'),  # 大型销售分析
+    path('company-sales/', views_company_sales.company_sales_analysis, name='company_sales_analysis'),  # 单公司销售分析
+
 ]

@@ -21,6 +21,12 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'sales:data_upload' %}">数据上传</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'sales:large_sales_analysis' %}">大型销售分析</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'sales:company_sales_analysis' %}">单公司销售分析</a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
