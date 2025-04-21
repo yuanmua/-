@@ -1,0 +1,61 @@
+{% extends "sales/base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4>个人资料</h4>
+            </div>
+            <div class="card-body">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="mb-3">基本信息</h5>
+                            <div class="mb-3">
+                                <label for="id_first_name" class="form-label">{{ user_form.first_name.label }}</label>
+                                {{ user_form.first_name }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_last_name" class="form-label">{{ user_form.last_name.label }}</label>
+                                {{ user_form.last_name }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_email" class="form-label">{{ user_form.email.label }}</label>
+                                {{ user_form.email }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="mb-3">工作信息</h5>
+                            <div class="mb-3">
+                                <label for="id_department" class="form-label">{{ profile_form.department.label }}</label>
+                                {{ profile_form.department }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_position" class="form-label">{{ profile_form.position.label }}</label>
+                                {{ profile_form.position }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_phone" class="form-label">{{ profile_form.phone.label }}</label>
+                                {{ profile_form.phone }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary">保存更改</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

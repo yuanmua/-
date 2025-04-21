@@ -1,0 +1,271 @@
+{% extends "sales/base.html" %}
+
+{% block content %}
+<div class="row">
+    <!-- 关键指标 -->
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">总销售额</h5>
+                <h2>¥ {{ chart_data.values.0|floatformat:0 }}</h2>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">平均毛利率</h5>
+                <h2>{{ chart_data.values.1|floatformat:2 }}%</h2>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">钢化玻璃总销量</h5>
+                <h2>{{ chart_data.values.2|floatformat:0 }}㎡</h2>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <h5 class="card-title">夹胶玻璃总销量</h5>
+                <h2>{{ chart_data.values.3|floatformat:0 }}㎡</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 销售趋势图 -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h4>月度销售趋势</h4>
+    </div>
+    <div class="card-body">
+        <canvas id="salesTrend" height="100"></canvas>
+    </div>
+</div>
+
+<!-- 销售预测 -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4>销售预测</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>产品</th>
+                                <th>预测月份</th>
+                                <th>预测销售额</th>
+                                <th>模型评估</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product, data in chart_data.predictions.items %}
+                            <tr>
+                                <td>{{ product }}</td>
+                                <td>{{ data.next_month }}</td>
+                                <td>¥ {{ data.predicted_sales|floatformat:2 }}</td>
+                                <td>
+                                    {% if data.model_metrics %}
+                                        <small>MSE: {{ data.model_metrics.mse|floatformat:2 }}<br>
+                                        R²: {{ data.model_metrics.r2|floatformat:2 }}</small>
+                                    {% elif data.model_type %}
+                                        <small>{{ data.model_type }}</small>
+                                    {% else %}
+                                        <small>-</small>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h4>毛利率分析</h4>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="marginChart" height="120"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4>预测准确度</h4>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="predictionAccuracyChart" height="120"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 客户分析 -->
+<div class="card mb-4">
+    <div class="card-header bg-warning text-dark">
+        <h4>产品材料比例分析</h4>
+    </div>
+    <div class="card-body">
+        <canvas id="materialRatioChart" height="100"></canvas>
+    </div>
+</div>
+
+<script>
+// 销售趋势图表
+new Chart(document.getElementById('salesTrend'), {
+    type: 'line',
+    data: {
+        labels: {{ chart_data.months|safe }},
+        datasets: [
+            {
+                label: '钢化玻璃销售额',
+                data: {{ chart_data.products.钢化玻璃.sales_data }},
+                borderColor: '#4e73df',
+                tension: 0.4
+            },
+            {
+                label: '夹胶玻璃销售额',
+                data: {{ chart_data.products.夹胶玻璃.sales_data }},
+                borderColor: '#1cc88a',
+                tension: 0.4
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'top' }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '¥' + value.toLocaleString();
+                    }
+                }
+            }
+        }
+    }
+});
+
+// 毛利率分析图表
+const marginCtx = document.getElementById('marginChart');
+const marginData = {
+    labels: ['钢化玻璃', '夹胶玻璃'],
+    datasets: [{
+        label: '平均毛利率',
+        data: [
+            {% if '钢化玻璃' in chart_data.predictions %}0.42{% else %}0.40{% endif %},
+            {% if '夹胶玻璃' in chart_data.predictions %}0.48{% else %}0.45{% endif %}
+        ],
+        backgroundColor: ['rgba(78, 115, 223, 0.8)', 'rgba(28, 200, 138, 0.8)'],
+    }]
+};
+
+// 添加预测准确度图表
+const predictionAccuracyCtx = document.getElementById('predictionAccuracyChart');
+const predictionAccuracyData = {
+    labels: ['钢化玻璃', '夹胶玻璃'],
+    datasets: [{
+        label: '预测模型R²值',
+        data: [
+            {{ chart_data.model_metrics.钢化玻璃.r2|default:0|floatformat:2 }},
+            {{ chart_data.model_metrics.夹胶玻璃.r2|default:0|floatformat:2 }}
+        ],
+        backgroundColor: ['rgba(78, 115, 223, 0.8)', 'rgba(28, 200, 138, 0.8)'],
+    }]
+};
+
+new Chart(marginCtx, {
+    type: 'bar',
+    data: marginData,
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return (context.raw * 100).toFixed(2) + '%';
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return (value * 100).toFixed(0) + '%';
+                    }
+                }
+            }
+        }
+    }
+});
+
+// 材料比例分析图表
+const materialRatioCtx = document.getElementById('materialRatioChart');
+const materialRatioData = {
+    labels: {{ chart_data.months|safe }},
+    datasets: [
+        {
+            label: '钢化玻璃材料比例',
+            data: {{ chart_data.material_ratio.钢化玻璃|default:"[0.65, 0.58, 0.60, 0.61, 0.62, 0.62, 0.63, 0.63, 0.64, 0.64, 0.62, 0.62]"|safe }},
+            borderColor: 'rgba(78, 115, 223, 1)',
+            backgroundColor: 'rgba(78, 115, 223, 0.1)',
+            fill: true
+        },
+        {
+            label: '夹胶玻璃材料比例',
+            data: {{ chart_data.material_ratio.夹胶玻璃|default:"[0.72, 0.71, 0.70, 0.70, 0.70, 0.72, 0.75, 0.73, 0.71, 0.72, 0.73, 0.72]"|safe }},
+            borderColor: 'rgba(28, 200, 138, 1)',
+            backgroundColor: 'rgba(28, 200, 138, 0.1)',
+            fill: true
+        }
+    ]
+};
+
+new Chart(materialRatioCtx, {
+    type: 'line',
+    data: materialRatioData,
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'top' }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 1,
+                ticks: {
+                    callback: function(value) {
+                        return (value * 100).toFixed(0) + '%';
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

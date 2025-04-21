@@ -1,0 +1,129 @@
+{% extends 'sales/base.html' %}
+
+{% block content %}
+<div class="row">
+    <!-- 关键指标展示 -->
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">销售总览</h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="alert alert-primary">
+                            总销售额：¥{{ summary_data.total_sales|floatformat:2 }}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-success">
+                            订单总数：{{ summary_data.total_orders }}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-info">
+                            客单价：¥{{ summary_data.avg_order_value|floatformat:2 }}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-warning">
+                            客户总数：{{ summary_data.total_customers }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 地区销售分布 -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <canvas id="regionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 产品分析 -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <canvas id="productChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 时间趋势预测 -->
+    <div class="col-md-12 mt-4">
+        <div class="card">
+            <div class="card-body">
+                <canvas id="forecastChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 地区销售饼图
+    new Chart(document.getElementById('regionChart'), {
+        type: 'pie',
+        data: {
+            labels: {{ chart_data.region_labels|safe }},
+            datasets: [{
+                data: {{ chart_data.region_values|safe }},
+                backgroundColor: [
+                    '#4dc9f6', '#f67019', '#f53794', '#537bc4',
+                    '#acc236', '#166a8f', '#00a950', '#58595b'
+                ]
+            }]
+        }
+    });
+
+    // 产品分析组合图
+    new Chart(document.getElementById('productChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ chart_data.product_labels|safe }},
+            datasets: [{
+                label: '销售量',
+                data: {{ chart_data.product_quantities|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                yAxisID: 'y'
+            }, {
+                label: '销售额',
+                data: {{ chart_data.product_amounts|safe }},
+                borderColor: 'rgb(75, 192, 192)',
+                type: 'line',
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            scales: {
+                y: { type: 'linear', position: 'left' },
+                y1: { type: 'linear', position: 'right' }
+            }
+        }
+    });
+
+    // 销售预测折线图
+    new Chart(document.getElementById('forecastChart'), {
+        type: 'line',
+        data: {
+            labels: [...{{ chart_data.time_labels|safe }}, ...({{ chart_data.predictions.dates|safe }} || [])],
+            datasets: [{
+                label: '历史销售额',
+                data: {{ chart_data.time_values|safe }},
+                borderColor: '#4dc9f6',
+                fill: false
+            }{% if chart_data.predictions %},
+            {
+                label: '预测销售额',
+                data: [...{{ chart_data.time_values|safe }}, ...{{ chart_data.predictions.values|safe }}],
+                borderColor: '#f67019',
+                borderDash: [5,5],
+                fill: false
+            }{% endif %}]
+        }
+    });
+});
+</script>
+{% endblock %}

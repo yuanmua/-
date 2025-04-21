@@ -1,0 +1,204 @@
+{% extends 'sales/base.html' %}
+
+{% block content %}
+<div class="row">
+    <!-- 关键指标展示 -->
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">销售概览</h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="alert alert-primary">
+                            总销售额：¥{{ summary_data.total_sales|floatformat:2 }}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-success">
+                            平均利润率：{{ summary_data.avg_margin|floatformat:2 }}%
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-info">
+                            合作公司数：{{ summary_data.total_companies }}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-warning">
+                            冠军公司：{{ summary_data.top_company|default:'暂无' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 公司销售分布图表 -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <canvas id="companySalesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 时间趋势图表 -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <canvas id="salesTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    {% if chart_data.predictions and chart_data.predictions.metrics %}
+    <!-- 模型评价指标 -->
+    <div class="col-md-12 mt-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">总体销售预测模型评价指标</h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="alert alert-info">
+                            均方根误差(RMSE)：{{ chart_data.predictions.metrics.rmse|floatformat:2 }}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-info">
+                            平均绝对误差(MAE)：{{ chart_data.predictions.metrics.mae|floatformat:2 }}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-info">
+                            平均绝对百分比误差(MAPE)：{{ chart_data.predictions.metrics.mape|floatformat:2 }}%
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-info">
+                            相关系数(CORR)：{{ chart_data.predictions.metrics.corr|floatformat:4 }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- 产品类型预测图表 -->
+{% if chart_data.product_predictions %}
+<div class="row mt-4">
+    <div class="col-md-12 mb-3">
+        <h4>主力产品预测分析</h4>
+    </div>
+    
+    {% for product_name, product_data in chart_data.product_predictions.items %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                {{ product_name }} 销售预测
+            </div>
+            <div class="card-body">
+                <canvas id="productChart{{ forloop.counter }}"></canvas>
+                
+                {% if product_data.metrics %}
+                <div class="mt-3">
+                    <h6>模型评价指标</h6>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <small>RMSE: {{ product_data.metrics.rmse|floatformat:2 }}</small>
+                        </div>
+                        <div class="col-md-3">
+                            <small>MAE: {{ product_data.metrics.mae|floatformat:2 }}</small>
+                        </div>
+                        <div class="col-md-3">
+                            <small>MAPE: {{ product_data.metrics.mape|floatformat:2 }}%</small>
+                        </div>
+                        <div class="col-md-3">
+                            <small>CORR: {{ product_data.metrics.corr|floatformat:4 }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 公司销售柱状图
+    new Chart(document.getElementById('companySalesChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ chart_data.company_names|safe }},
+            datasets: [{
+                label: '销售额',
+                data: {{ chart_data.company_sales|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.6)'
+            }]
+        }
+    });
+
+    // 销售趋势折线图
+    new Chart(document.getElementById('salesTrendChart'), {
+        type: 'line',
+        data: {
+            labels: {{ chart_data.time_labels|safe }},
+            datasets: [{
+                label: '历史销售额',
+                data: {{ chart_data.time_values|safe }},
+                borderColor: 'rgb(75, 192, 192)',
+                fill: false
+            }{% if chart_data.predictions %},
+            {
+                label: '预测销售额 (三级级联模型)',
+                data: [...Array({{ chart_data.time_values|length }}).fill(null), ...{{ chart_data.predictions.values|safe }}],
+                borderColor: 'rgb(255, 99, 132)',
+                borderDash: [5,5],
+                fill: false
+            }{% endif %}]
+        },
+        options: {
+            responsive: true,
+            title: {
+                display: true,
+                text: '销售趋势与预测'
+            }
+        }
+    });
+    
+    // 渲染各产品类型预测图表
+    {% for product_name, product_data in chart_data.product_predictions.items %}
+    new Chart(document.getElementById('productChart{{ forloop.counter }}'), {
+        type: 'line',
+        data: {
+            labels: [...{{ product_data.time_labels|safe }}, ...{{ product_data.dates|safe }}],
+            datasets: [{
+                label: '历史销售额',
+                data: [...{{ product_data.time_values|safe }}, ...Array({{ product_data.dates|length }}).fill(null)],
+                borderColor: 'rgb(75, 192, 192)',
+                fill: false
+            },
+            {
+                label: '预测销售额',
+                data: [...Array({{ product_data.time_values|length }}).fill(null), ...{{ product_data.values|safe }}],
+                borderColor: 'rgb(255, 99, 132)',
+                borderDash: [5,5],
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            title: {
+                display: true,
+                text: '{{ product_name }} 销售趋势与预测'
+            }
+        }
+    });
+    {% endfor %}
+});
+</script>
+{% endblock %}
