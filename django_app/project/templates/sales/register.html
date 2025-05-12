@@ -1,13 +1,15 @@
 {% extends "sales/base.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-success text-white">
-                <h4>用户注册</h4>
+<div class="vh-100 d-flex align-items-center justify-content-center background-register">
+    <div class="animated-card">
+        <div class="card hover-scale">
+            <div class="card-header bg-success text-white" style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
+                <h4><i class="fas fa-user-plus me-2"></i>用户注册</h4>
             </div>
-            <div class="card-body">
+            <div class="card-body" style="position: relative;">
+                <div class="register-decoration" style="position: absolute; top: -20px; right: -20px; width: 60px; height: 60px; background: linear-gradient(135deg, #38f9d7 0%, #43e97b 100%); border-radius: 50%; z-index: 1;"></div>
+                <div class="register-decoration" style="position: absolute; bottom: -15px; left: -15px; width: 50px; height: 50px; background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); border-radius: 50%; z-index: 1;"></div>
                 {% if messages %}
                     {% for message in messages %}
                         <div class="alert alert-{{ message.tags }}">
@@ -18,9 +20,10 @@
                 
                 <form method="post">
                     {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="id_username" class="form-label">{{ form.username.label }}</label>
+                    <div class="form-group floating-label">
                         {{ form.username }}
+                        <label for="id_username">{{ form.username.label }}</label>
+                        <span class="focus-border"></span>
                         {% if form.username.errors %}
                             <div class="text-danger">
                                 {% for error in form.username.errors %}
@@ -40,9 +43,10 @@
 <!--                            </div>-->
 <!--                        {% endif %}-->
 <!--                    </div>-->
-                    <div class="mb-3">
-                        <label for="id_password1" class="form-label">{{ form.password1.label }}</label>
+                    <div class="form-group floating-label mt-4">
                         {{ form.password1 }}
+                        <label for="id_password1">{{ form.password1.label }}</label>
+                        <span class="focus-border"></span>
                         {% if form.password1.errors %}
                             <div class="text-danger">
                                 {% for error in form.password1.errors %}
@@ -52,9 +56,10 @@
                         {% endif %}
                         <div class="form-text">密码必须包含至少8个字符，不能是纯数字。</div>
                     </div>
-                    <div class="mb-3">
-                        <label for="id_password2" class="form-label">{{ form.password2.label }}</label>
+                    <div class="form-group floating-label mt-4">
                         {{ form.password2 }}
+                        <label for="id_password2">{{ form.password2.label }}</label>
+                        <span class="focus-border"></span>
                         {% if form.password2.errors %}
                             <div class="text-danger">
                                 {% for error in form.password2.errors %}

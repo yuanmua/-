@@ -1,40 +1,179 @@
 {% extends "sales/base.html" %}
 
 {% block content %}
-<div class="card mb-4">
-    <div class="card-header">
-        <h4>数据上传</h4>
-    </div>
-    <div class="card-body">
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="dataFile" class="form-label">选择销售数据文件</label>
-                <input class="form-control" type="file" id="dataFile" name="data_file" accept=".csv,.xlsx,.xls">
-                <div class="form-text">支持CSV和Excel格式</div>
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4 shadow-sm border-0 rounded-lg">
+                <div class="card-header bg-gradient-primary">
+                    <h4 class="mb-0"><i class="fas fa-upload me-2"></i>数据上传</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="dataType" class="form-label fw-bold">选择数据类型</label>
+                                    <select class="form-select" id="dataType" name="data_type" required>
+                                        <option value="" selected disabled>请选择数据类型</option>
+                                        <option value="large_sales">大型玻璃加工销售数据</option>
+                                        <option value="single_company">单公司玻璃销售数据</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="dataFile" class="form-label fw-bold">选择数据文件</label>
+                                    <input class="form-control" type="file" id="dataFile" name="data_file" accept=".csv,.xlsx,.xls" required>
+                                    <div class="form-text text-muted"><i class="fas fa-info-circle me-1"></i>支持CSV和Excel格式</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-cloud-upload-alt me-2"></i>上传并分析
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">上传并分析</button>
-        </form>
+        </div>
     </div>
-</div>
 
-<div class="card">
-    <div class="card-header">
-        <h4>数据格式说明</h4>
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-lg h-100">
+                <div class="card-header bg-gradient-info">
+                    <h5 class="mb-0"><i class="fas fa-table me-2"></i>大型玻璃加工销售数据格式</h5>
+                </div>
+                <div class="card-body">
+                    <p>上传的文件应包含以下列：</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>字段名</th>
+                                    <th>说明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>订单ID</strong></td>
+                                    <td>订单唯一标识</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>客户ID</strong></td>
+                                    <td>客户唯一标识</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>产品名称</strong></td>
+                                    <td>产品类型名称</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>数量</strong></td>
+                                    <td>销售数量</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>单价</strong></td>
+                                    <td>产品单价</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>销售日期</strong></td>
+                                    <td>销售日期 (YYYY-MM-DD格式)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>地区</strong></td>
+                                    <td>销售区域</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>总金额</strong></td>
+                                    <td>销售总金额</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-lg h-100">
+                <div class="card-header bg-gradient-success">
+                    <h5 class="mb-0"><i class="fas fa-building me-2"></i>单公司玻璃销售数据格式</h5>
+                </div>
+                <div class="card-body">
+                    <p>上传的文件应包含以下列：</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>字段名</th>
+                                    <th>说明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>公司名称</strong></td>
+                                    <td>公司名称</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>地区</strong></td>
+                                    <td>销售区域</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>产品名称</strong></td>
+                                    <td>产品类型名称</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>数量</strong></td>
+                                    <td>销售数量</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>原始价格</strong></td>
+                                    <td>产品原始价格</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>销售价格</strong></td>
+                                    <td>产品销售价格</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>销售金额</strong></td>
+                                    <td>销售总金额</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>净利润率</strong></td>
+                                    <td>净利润率 (小数形式)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>销售日期</strong></td>
+                                    <td>销售日期 (YYYY-MM-DD格式)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card-body">
-        <p>上传的文件应包含以下列：</p>
-        <ul>
-{#            <li><strong>月份</strong>: 销售月份 (例如: "1月")</li>#}
-{#            <li><strong>产品</strong>: 产品类型 (例如: "钢化玻璃", "夹胶玻璃")</li>#}
-{#            <li><strong>销售量</strong>: 销售数量 (单位: 平方米)</li>#}
-{#            <li><strong>销售额</strong>: 销售金额 (单位: 元)</li>#}
-{#            <li><strong>成本</strong>: 生产成本 (单位: 元)</li>#}
-{#            <li><strong>毛利率</strong>: 毛利率 (小数形式, 例如0.5表示50%)</li>#}
-{#            <li><strong>单价</strong>: 每平方米单价 (单位: 元/平方米)</li>#}
-{#            <li><strong>材料比例</strong>: 材料成本占比 (小数形式)</li>#}
-{#            <li><strong>主要客户</strong>: 主要客户信息</li>#}
-        </ul>
+    
+    <div class="row mt-4 mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-lg">
+                <div class="card-header bg-gradient-warning">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>数据管理提示</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>上传数据后，您可以在以下页面管理数据：
+                        <ul class="mt-2 mb-0">
+                            <li><a href="{% url 'sales:large_sales_list' %}" class="alert-link">大型玻璃加工销售数据管理</a></li>
+                            <li><a href="{% url 'sales:single_company_list' %}" class="alert-link">单公司玻璃销售数据管理</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

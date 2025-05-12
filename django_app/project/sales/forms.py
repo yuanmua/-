@@ -6,9 +6,9 @@ from sales.models.models import Profile
 class UserLoginForm(AuthenticationForm):
     """用户登录表单"""
     username = forms.CharField(label='用户名', 
-                               widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '请输入用户名'}))
+                               widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': ''}))
     password = forms.CharField(label='密码', 
-                               widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': '请输入密码'}))
+                               widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': ''}))
     
     class Meta:
         model = User
@@ -17,13 +17,13 @@ class UserLoginForm(AuthenticationForm):
 class UserRegisterForm(UserCreationForm):
     """用户注册表单"""
     username = forms.CharField(label='用户名', 
-                               widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '请输入用户名'}))
+                               widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': ''}))
     # email = forms.EmailField(label='邮箱',
-    #                          widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': '请输入邮箱'}))
+    #                          widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': ''}))
     password1 = forms.CharField(label='密码', 
-                                widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': '请输入密码'}))
+                                widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': ''}))
     password2 = forms.CharField(label='确认密码', 
-                                widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': '请再次输入密码'}))
+                                widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': ''}))
     
     class Meta:
         model = User

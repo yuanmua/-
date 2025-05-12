@@ -20,7 +20,7 @@ def get_large_sales_data():
     # 例如: GlassProcessingSalesLarge.objects.all()
     # 但由于我们直接使用SQL文件，这里模拟从数据库获取数据
     try:
-        # 尝试从CSV文件读取数据（实际项目中应从数据库读取）
+        # 尝试从CSV文件读取数据
         # df = pd.read_csv('db/glass_processing_sales_data_large.csv')
 
         queryset = GlassProcessingSalesLarge.objects.all()

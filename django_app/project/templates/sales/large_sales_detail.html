@@ -1,0 +1,175 @@
+{% extends "sales/base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-lg">
+                <div class="card-header bg-gradient-primary d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>销售数据详情</h4>
+                    <div>
+                        <a href="{% url 'sales:large_sales_list' %}" class="btn btn-light btn-sm me-2">
+                            <i class="fas fa-list me-1"></i>返回列表
+                        </a>
+                        <a href="{% url 'sales:large_sales_edit' sales_item.id %}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit me-1"></i>编辑
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-4 border-0 shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>基本信息</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless">
+                                        <tbody>
+                                            <tr>
+                                                <th class="text-muted" style="width: 30%">订单ID</th>
+                                                <td>{{ sales_item.order_id }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">客户ID</th>
+                                                <td>{{ sales_item.customer_id }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">产品名称</th>
+                                                <td>{{ sales_item.product_name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">销售日期</th>
+                                                <td>{{ sales_item.sale_date|date:"Y年m月d日" }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">地区</th>
+                                                <td>{{ sales_item.region }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card mb-4 border-0 shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>销售数据</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless">
+                                        <tbody>
+                                            <tr>
+                                                <th class="text-muted" style="width: 30%">数量</th>
+                                                <td>{{ sales_item.quantity }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">单价</th>
+                                                <td>¥ {{ sales_item.unit_price }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">总金额</th>
+                                                <td class="text-primary fw-bold">¥ {{ sales_item.total_amount }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>数据可视化</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <canvas id="productComparisonChart" height="300"></canvas>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <canvas id="regionComparisonChart" height="300"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // 产品对比图表
+    const productCtx = document.getElementById('productComparisonChart').getContext('2d');
+    const productChart = new Chart(productCtx, {
+        type: 'bar',
+        data: {
+            labels: ['当前产品', '平均值'],
+            datasets: [{
+                label: '销售金额',
+                data: [{{ sales_item.total_amount }}, {{ avg_amount|default:0 }}],
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 99, 132, 0.7)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '产品销售金额对比'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // 地区对比图表
+    const regionCtx = document.getElementById('regionComparisonChart').getContext('2d');
+    const regionChart = new Chart(regionCtx, {
+        type: 'bar',
+        data: {
+            labels: ['当前地区', '平均值'],
+            datasets: [{
+                label: '销售数量',
+                data: [{{ sales_item.quantity }}, {{ avg_quantity|default:0 }}],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '地区销售数量对比'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

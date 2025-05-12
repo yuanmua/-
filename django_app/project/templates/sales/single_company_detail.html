@@ -1,0 +1,184 @@
+{% extends "sales/base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-lg">
+                <div class="card-header bg-gradient-success text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>单公司销售数据详情</h4>
+                    <div>
+                        <a href="{% url 'sales:single_company_list' %}" class="btn btn-light btn-sm me-2">
+                            <i class="fas fa-list me-1"></i>返回列表
+                        </a>
+                        <a href="{% url 'sales:single_company_edit' sales_item.id %}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit me-1"></i>编辑
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-4 border-0 shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0"><i class="fas fa-building me-2"></i>公司信息</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless">
+                                        <tbody>
+                                            <tr>
+                                                <th class="text-muted" style="width: 30%">公司名称</th>
+                                                <td>{{ sales_item.company_name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">地区</th>
+                                                <td>{{ sales_item.region }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">产品名称</th>
+                                                <td>{{ sales_item.product_name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">销售日期</th>
+                                                <td>{{ sales_item.sale_date|date:"Y年m月d日" }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card mb-4 border-0 shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>销售数据</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless">
+                                        <tbody>
+                                            <tr>
+                                                <th class="text-muted" style="width: 30%">数量</th>
+                                                <td>{{ sales_item.quantity }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">原始价格</th>
+                                                <td>¥ {{ sales_item.original_price }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">销售价格</th>
+                                                <td>¥ {{ sales_item.sale_price }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">销售金额</th>
+                                                <td class="text-primary fw-bold">¥ {{ sales_item.sales_amount }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">净利润率</th>
+                                                <td class="text-success fw-bold">{{ sales_item.net_margin }}%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>数据可视化</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <canvas id="priceComparisonChart" height="300"></canvas>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <canvas id="marginComparisonChart" height="300"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // 价格对比图表
+    const priceCtx = document.getElementById('priceComparisonChart').getContext('2d');
+    const priceChart = new Chart(priceCtx, {
+        type: 'bar',
+        data: {
+            labels: ['原始价格', '销售价格'],
+            datasets: [{
+                label: '价格对比',
+                data: [{{ sales_item.original_price }}, {{ sales_item.sale_price }}],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '价格对比分析'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // 利润率对比图表
+    const marginCtx = document.getElementById('marginComparisonChart').getContext('2d');
+    const marginChart = new Chart(marginCtx, {
+        type: 'bar',
+        data: {
+            labels: ['当前利润率', '平均利润率'],
+            datasets: [{
+                label: '利润率对比',
+                data: [{{ sales_item.net_margin }}, {{ avg_margin|default:0 }}],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '利润率对比分析'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

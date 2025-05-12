@@ -23,12 +23,10 @@ COPY ./data/*.csv /app/data/
 COPY ./scripts/* /app/scripts/
 
 # 设置执行权限
-RUN chmod +x /app/scripts/init.sh
+RUN chmod +x ./scripts/wait_for_db.py
 
 # 自定义入口点
 COPY ./scripts/wait-for-db.sh .
 RUN chmod +x wait-for-db.sh
 
-#CMD ["./wait-for-db.sh", "db:3306", "--", "sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
-CMD ["/app/scripts/init.sh"]
-CMD ["sh", "-c", "python ./project/manage.py migrate && python ./project/manage.py runserver 0.0.0.0:8000"]
+CMD ["./scripts/entrypoint.sh"]

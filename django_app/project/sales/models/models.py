@@ -3,24 +3,29 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-# class SalesData(models.Model):
-#     """销售数据模型"""
-#     month = models.CharField('月份', max_length=10)
-#     product = models.CharField('产品', max_length=50)
-#     sales_volume = models.FloatField('销售量', null=True, blank=True)
-#     sales_amount = models.FloatField('销售额')
-#     cost = models.FloatField('成本', null=True, blank=True)
-#     gross_margin = models.FloatField('毛利率')
-#     unit_price = models.FloatField('单价')
-#     material_ratio = models.FloatField('材料比例')
-#     major_client = models.CharField('主要客户', max_length=100)
-#
-#     class Meta:
-#         verbose_name = '销售数据'
-#         verbose_name_plural = verbose_name
-#
-#     def __str__(self):
-#         return f"{self.month}-{self.product}"
+class SalesData(models.Model):
+    """玻璃加工销售数据模型"""
+    product_type_choices = (
+        ('钢化玻璃', '钢化玻璃'),
+        ('夹层玻璃', '夹层玻璃'),
+    )
+    month = models.CharField('月份', max_length=10)
+    product_type = models.CharField('产品类型', max_length=50, choices=product_type_choices)
+    sales_volume = models.FloatField('销售量(㎡)')
+    sales_amount = models.FloatField('销售额')
+    material_ratio = models.FloatField('材料比例')
+    forecast_accuracy = models.FloatField('预测准确率', null=True, blank=True)
+    timestamp = models.DateTimeField('记录时间', auto_now_add=True)
+
+    class Meta:
+        verbose_name = '玻璃销售数据'
+        verbose_name_plural = verbose_name
+        indexes = [
+            models.Index(fields=['product_type', 'month']),
+        ]
+
+    def __str__(self):
+        return f"{self.month}-{self.product_type}"
 
 class Profile(models.Model):
     """用户配置文件模型，扩展Django内置User模型"""

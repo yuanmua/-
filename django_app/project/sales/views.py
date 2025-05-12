@@ -1,3 +1,5 @@
+from itertools import chain
+
 import pandas as pd
 import numpy as np
 import os
@@ -11,10 +13,11 @@ from django.db.models import Sum
 from django.conf import settings
 
 from .forms import UserLoginForm, UserRegisterForm, ProfileForm, UserForm
-from sales.models.models_company_sales import GlassProcessingSalesSingleCompany
+from sales.models.models_single_company import GlassProcessingSalesSingleCompany
 from sales.models.models_large_sales import GlassProcessingSalesLarge
 from sales.ml_models.model_utils import preprocess_data
 from sales.ml_models.dashboard_models import get_dashboard_predictor, prepare_product_data
+import matplotlib.pyplot as plt
 
 
 # 这些函数已移至 sales.ml_models.model_utils 模块
@@ -47,7 +50,7 @@ def dashboard(request):
         'net_margin': [float(item.net_margin) for item in company_sales],
         'sale_date': [item.sale_date for item in company_sales],
     }
-    
+
     # 创建DataFrame
     df_large = pd.DataFrame(large_data)
     df_company = pd.DataFrame(company_data)
@@ -93,39 +96,57 @@ def dashboard(request):
             elif '夹胶' in product:
                 laminated_glass_volume += df_company[df_company['product_name'] == product]['quantity'].sum()
     
-    # 按月份和产品类型分组计算销售额
+    # 按产品类型和月份分组计算销售额
     month_order = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
-    monthly_sales_tempered = [0] * 12
-    monthly_sales_laminated = [0] * 12
     
-    # 从大型销售数据计算月度销售额
+    # 动态获取所有产品种类
+    all_products = list(all_products)
+    product_colors = ['#4e73df', '#1cc88a', '#f6c23e', '#e74a3b', '#36b9cc', '#858796']
+    
+    # 初始化产品数据
+    product_volumes = {product: 0 for product in all_products}
+    product_sales = {product: [0] * 12 for product in all_products}
+    product_margins = {product: 0 for product in all_products}
+    
+    # 从大型销售数据计算月度销售额和销量
     if not df_large.empty:
-        for month_idx, month in enumerate(month_order):
-            month_num = month_idx + 1
-            for product in df_large['product_name'].unique():
+        for product in df_large['product_name'].unique():
+            product_volumes[product] += df_large[df_large['product_name'] == product]['quantity'].sum()
+            for month_idx, month in enumerate(month_order):
+                month_num = month_idx + 1
                 month_product_sales = df_large[(df_large['month'] == month_num) & (df_large['product_name'] == product)]['total_amount'].sum()
-                if '钢化' in product:
-                    monthly_sales_tempered[month_idx] += float(month_product_sales)
-                elif '夹胶' in product:
-                    monthly_sales_laminated[month_idx] += float(month_product_sales)
+                product_sales[product][month_idx] += float(month_product_sales)
     
-    # 从单公司销售数据计算月度销售额
+    # 从单公司销售数据计算月度销售额和销量
     if not df_company.empty:
-        for month_idx, month in enumerate(month_order):
-            month_num = month_idx + 1
-            for product in df_company['product_name'].unique():
+        for product in df_company['product_name'].unique():
+            product_volumes[product] += df_company[df_company['product_name'] == product]['quantity'].sum()
+            for month_idx, month in enumerate(month_order):
+                month_num = month_idx + 1
                 month_product_sales = df_company[(df_company['month'] == month_num) & (df_company['product_name'] == product)]['sales_amount'].sum()
-                if '钢化' in product:
-                    monthly_sales_tempered[month_idx] += float(month_product_sales)
-                elif '夹胶' in product:
-                    monthly_sales_laminated[month_idx] += float(month_product_sales)
+                product_sales[product][month_idx] += float(month_product_sales)
+                
+            # 计算产品毛利率
+            product_data = df_company[df_company['product_name'] == product]
+            if not product_data.empty and product_data['sales_amount'].sum() > 0:
+                product_margins[product] = (product_data['net_margin'] * product_data['sales_amount']).sum() / product_data['sales_amount'].sum()
     
     # 准备图表数据
     chart_data = {
         'months': month_order,
-        '钢化玻璃': monthly_sales_tempered,
-        '夹层玻璃': monthly_sales_laminated,
-        'values': [total_sales, avg_gross_margin, tempered_glass_volume, laminated_glass_volume]
+        'products': {
+            product: {
+                'sales_data': product_sales[product],
+                'color': product_colors[i % len(product_colors)]
+            } for i, product in enumerate(all_products)
+        },
+        'product_volumes': product_volumes,
+        'product_names': all_products,
+        'margin_data': [float(product_margins.get(product, 0)) for product in all_products],
+        'margin_colors': [product_colors[i % len(product_colors)] for i in range(len(all_products))],
+        'radar_sales': [float(sum(product_sales[product]) / max(1, sum(sum(sales) for sales in product_sales.values()))) for product in all_products],
+        'radar_margins': [float(product_margins.get(product, 0)) for product in all_products],
+        'values': [total_sales, avg_gross_margin]
     }
     
     # 销售预测 - 使用预训练模型
@@ -220,9 +241,7 @@ def dashboard(request):
     
     return render(request, 'sales/dashboard.html', {'chart_data': chart_data})
 
-def data_upload(request):
-    """数据上传视图"""
-    return render(request, 'sales/data_upload.html')
+# 数据上传视图已移至views_data_management.py文件中
 
 
 def login_view(request):
@@ -329,3 +348,41 @@ def user_delete(request, user_id):
     user.delete()
     messages.success(request, f'用户 {username} 已被删除。')
     return redirect('sales:user_management')
+#
+#
+# # 按产品类型和月份聚合数据
+# product_types = ['钢化玻璃', '夹层玻璃']
+# monthly_data = {pt: [0]*12 for pt in product_types}
+# # 从数据库获取销售数据
+# large_sales = GlassProcessingSalesLarge.objects.all()
+# company_sales = GlassProcessingSalesSingleCompany.objects.all()
+#
+# # 合并处理所有销售数据
+# for item in chain(large_sales, company_sales):
+#     try:
+#         month_num = int(item.month.split('月')[0])
+#         if item.product_type in product_types:
+#             monthly_data[item.product_type][month_num-1] += item.sales_volume
+#     except:
+#         continue
+#
+# # 生成图表数据
+# chart_data = {
+#     'months': [f'{i}月' for i in range(1,13)],
+#     'products': {
+#         pt: {
+#             'sales_data': monthly_data[pt],
+#             'total_volume': sum(monthly_data[pt])
+#         } for pt in product_types
+#     },
+#     'material_ratio': {
+#         pt: [v/sum(monthly_data[pt]) if sum(monthly_data[pt])>0 else 0 for v in monthly_data[pt]]
+#         for pt in product_types
+#     }
+# }
+# # 生成可视化图表并保存
+# plt.figure(figsize=(12,6))
+# for pt in product_types:
+#     plt.plot(chart_data['months'], monthly_data[pt], label=pt)
+# plt.savefig('./img/sales_trend.png')
+# plt.close()

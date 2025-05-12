@@ -4,7 +4,7 @@ import numpy as np
 from django.conf import settings
 from django.db.models import Sum
 
-from sales.models.models_company_sales import GlassProcessingSalesSingleCompany
+from sales.models.models_single_company import GlassProcessingSalesSingleCompany
 from sales.models.models_large_sales import GlassProcessingSalesLarge
 from sales.ml_models.model_utils import preprocess_data
 from sales.ml_models.dashboard_models import get_dashboard_predictor, prepare_product_data
@@ -49,30 +49,30 @@ def pretrain_dashboard_models():
     df_large = pd.DataFrame(large_data)
     df_company = pd.DataFrame(company_data)
     
-    # 数据预处理
-    if not df_large.empty:
-        df_large = preprocess_data(df_large)
-    if not df_company.empty:
-        df_company = preprocess_data(df_company)
+    # # 数据预处理
+    # if not df_large.empty:
+    #     df_large = preprocess_data(df_large)
+    # if not df_company.empty:
+    #     df_company = preprocess_data(df_company)
     
     # 训练仪表盘产品类型模型
-    if not df_large.empty or not df_company.empty:
-        print("训练仪表盘产品类型模型...")
-        dashboard_predictor = get_dashboard_predictor()
-        
-        # 训练钢化玻璃模型
-        tempered_data = prepare_product_data(df_large, df_company, '钢化玻璃')
-        if not tempered_data.empty and len(tempered_data) >= 3:  # 至少需要3个数据点
-            print("训练钢化玻璃模型...")
-            dashboard_predictor.train_product_model(tempered_data, '钢化玻璃')
-        
-        # 训练夹胶玻璃模型
-        laminated_data = prepare_product_data(df_large, df_company, '夹胶玻璃')
-        if not laminated_data.empty and len(laminated_data) >= 3:  # 至少需要3个数据点
-            print("训练夹胶玻璃模型...")
-            dashboard_predictor.train_product_model(laminated_data, '夹胶玻璃')
-    
-    print("仪表盘模型预训练完成！")
+    # if not df_large.empty or not df_company.empty:
+    #     print("训练仪表盘产品类型模型...")
+    #     dashboard_predictor = get_dashboard_predictor()
+    #
+    #     # 训练钢化玻璃模型
+    #     tempered_data = prepare_product_data(df_large, df_company, '钢化玻璃')
+    #     if not tempered_data.empty and len(tempered_data) >= 3:  # 至少需要3个数据点
+    #         print("训练钢化玻璃模型...")
+    #         dashboard_predictor.train_product_model(tempered_data, '钢化玻璃')
+    #
+    #     # 训练夹胶玻璃模型
+    #     laminated_data = prepare_product_data(df_large, df_company, '夹层玻璃')
+    #     if not laminated_data.empty and len(laminated_data) >= 3:  # 至少需要3个数据点
+    #         print("训练夹层玻璃模型...")
+    #         dashboard_predictor.train_product_model(laminated_data, '夹层玻璃')
+    #
+    # print("仪表盘模型预训练完成！")
 
 
 # 当直接运行此脚本时，执行模型训练

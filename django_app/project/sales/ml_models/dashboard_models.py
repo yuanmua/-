@@ -172,12 +172,12 @@ def prepare_product_data(df_large, df_company, product_type):
     
     if not df_large.empty:
         for product in df_large['product_name'].unique():
-            if (product_type == '钢化玻璃' and '钢化' in product) or (product_type == '夹胶玻璃' and '夹胶' in product):
+            if (product_type == '钢化玻璃' and '钢化' in product) or (product_type == '夹层玻璃' and '夹层' in product):
                 product_data_large = pd.concat([product_data_large, df_large[df_large['product_name'] == product]])
     
     if not df_company.empty:
         for product in df_company['product_name'].unique():
-            if (product_type == '钢化玻璃' and '钢化' in product) or (product_type == '夹胶玻璃' and '夹胶' in product):
+            if (product_type == '钢化玻璃' and '钢化' in product) or (product_type == '夹层玻璃' and '夹层' in product):
                 product_data_company = pd.concat([product_data_company, df_company[df_company['product_name'] == product]])
     
     # 合并两个数据源

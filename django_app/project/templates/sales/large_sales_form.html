@@ -1,0 +1,152 @@
+{% extends "sales/base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-lg">
+                <div class="card-header bg-gradient-primary">
+                    <h4 class="mb-0"><i class="fas fa-edit me-2"></i>{% if form.instance.pk %}编辑{% else %}新增{% endif %}销售数据</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="id_order_id" class="form-label fw-bold">订单ID</label>
+                                    <input type="text" name="order_id" id="id_order_id" class="form-control {% if form.order_id.errors %}is-invalid{% endif %}" value="{{ form.order_id.value|default:'' }}" required>
+                                    {% if form.order_id.errors %}
+                                    <div class="invalid-feedback">{{ form.order_id.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="id_customer_id" class="form-label fw-bold">客户ID</label>
+                                    <input type="text" name="customer_id" id="id_customer_id" class="form-control {% if form.customer_id.errors %}is-invalid{% endif %}" value="{{ form.customer_id.value|default:'' }}" required>
+                                    {% if form.customer_id.errors %}
+                                    <div class="invalid-feedback">{{ form.customer_id.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="id_product_name" class="form-label fw-bold">产品名称</label>
+                                    <input type="text" name="product_name" id="id_product_name" class="form-control {% if form.product_name.errors %}is-invalid{% endif %}" value="{{ form.product_name.value|default:'' }}" required>
+                                    {% if form.product_name.errors %}
+                                    <div class="invalid-feedback">{{ form.product_name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="id_region" class="form-label fw-bold">地区</label>
+                                    <input type="text" name="region" id="id_region" class="form-control {% if form.region.errors %}is-invalid{% endif %}" value="{{ form.region.value|default:'' }}" required>
+                                    {% if form.region.errors %}
+                                    <div class="invalid-feedback">{{ form.region.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label for="id_quantity" class="form-label fw-bold">数量</label>
+                                    <input type="number" name="quantity" id="id_quantity" class="form-control {% if form.quantity.errors %}is-invalid{% endif %}" value="{{ form.quantity.value|default:'' }}" required min="1">
+                                    {% if form.quantity.errors %}
+                                    <div class="invalid-feedback">{{ form.quantity.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label for="id_unit_price" class="form-label fw-bold">单价</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">¥</span>
+                                        <input type="number" name="unit_price" id="id_unit_price" class="form-control {% if form.unit_price.errors %}is-invalid{% endif %}" value="{{ form.unit_price.value|default:'' }}" required step="0.01" min="0.01">
+                                        {% if form.unit_price.errors %}
+                                        <div class="invalid-feedback">{{ form.unit_price.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label for="id_total_amount" class="form-label fw-bold">总金额</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">¥</span>
+                                        <input type="number" name="total_amount" id="id_total_amount" class="form-control {% if form.total_amount.errors %}is-invalid{% endif %}" value="{{ form.total_amount.value|default:'' }}" required step="0.01" min="0.01">
+                                        {% if form.total_amount.errors %}
+                                        <div class="invalid-feedback">{{ form.total_amount.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="id_sale_date" class="form-label fw-bold">销售日期</label>
+                                    <input type="date" name="sale_date" id="id_sale_date" class="form-control {% if form.sale_date.errors %}is-invalid{% endif %}" value="{{ form.sale_date.value|date:'Y-m-d'|default:'' }}" required>
+                                    {% if form.sale_date.errors %}
+                                    <div class="invalid-feedback">{{ form.sale_date.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'sales:large_sales_list' %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-times me-1"></i>取消
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>保存
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // 自动计算总金额
+    document.getElementById('id_quantity').addEventListener('input', calculateTotal);
+    document.getElementById('id_unit_price').addEventListener('input', calculateTotal);
+    
+    function calculateTotal() {
+        const quantity = parseFloat(document.getElementById('id_quantity').value) || 0;
+        const unitPrice = parseFloat(document.getElementById('id_unit_price').value) || 0;
+        const totalAmount = (quantity * unitPrice).toFixed(2);
+        
+        if (quantity > 0 && unitPrice > 0) {
+            document.getElementById('id_total_amount').value = totalAmount;
+        }
+    }
+    
+    // 表单验证
+    (function () {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}
+{% endblock %}

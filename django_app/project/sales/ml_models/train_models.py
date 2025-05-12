@@ -3,7 +3,7 @@ import pandas as pd
 from django.db.models import Sum
 from django.conf import settings
 
-from sales.models.models_company_sales import GlassProcessingSalesSingleCompany
+from sales.models.models_single_company import GlassProcessingSalesSingleCompany
 from sales.models.models_large_sales import GlassProcessingSalesLarge
 from sales.ml_models.model_utils import preprocess_data
 from sales.ml_models.large_sales_models import get_large_sales_predictor, prepare_time_series_data
@@ -73,21 +73,21 @@ def train_all_models():
             if not time_series.empty:
                 company_predictor.train(time_series)
     
-    # 训练仪表盘产品类型模型
-    if not df_large.empty or not df_company.empty:
-        print("训练仪表盘产品类型模型...")
-        dashboard_predictor = get_dashboard_predictor()
-        
-        # 训练钢化玻璃模型
-        tempered_data = prepare_product_data(df_large, df_company, '钢化玻璃')
-        if not tempered_data.empty:
-            dashboard_predictor.train_product_model(tempered_data, '钢化玻璃')
-        
-        # 训练夹胶玻璃模型
-        laminated_data = prepare_product_data(df_large, df_company, '夹胶玻璃')
-        if not laminated_data.empty:
-            dashboard_predictor.train_product_model(laminated_data, '夹胶玻璃')
-    
+    # # 训练仪表盘产品类型模型
+    # if not df_large.empty or not df_company.empty:
+    #     print("训练仪表盘产品类型模型...")
+    #     dashboard_predictor = get_dashboard_predictor()
+    #
+    #     # 训练钢化玻璃模型
+    #     tempered_data = prepare_product_data(df_large, df_company, '钢化玻璃')
+    #     if not tempered_data.empty:
+    #         dashboard_predictor.train_product_model(tempered_data, '钢化玻璃')
+    #
+    #     # 训练夹胶玻璃模型
+    #     laminated_data = prepare_product_data(df_large, df_company, '夹层玻璃')
+    #     if not laminated_data.empty:
+    #         dashboard_predictor.train_product_model(laminated_data, '夹层玻璃')
+    #
     print("模型预训练完成！")
 
 

@@ -1,4 +1,4 @@
-##!/bin/bash
+#!/bin/bash
 #
 ##host="$1"
 ##shift
@@ -15,16 +15,17 @@
 #
 #
 #
-#host="$1"
-#shift
-#port="$2"
-#shift
-#
-#
-#echo "Waiting for $host:3306..."
-#while ! curl -s "$host:$port" > /dev/null; do
-#  sleep 2
-#done
-#
-#echo "$host:$port is available, executing command"
-#exec "$@"
+host="$1"
+shift
+port="$2"
+shift
+
+
+echo "Waiting for $host..."
+while ! curl -s "$host" > /dev/null; do
+  sleep 2
+done
+
+sleep 2
+echo "$host:$port is available, executing command"
+exec "$@"

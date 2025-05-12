@@ -10,7 +10,7 @@ from sklearn.preprocessing import MinMaxScaler
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
-from sales.models.models_company_sales import GlassProcessingSalesSingleCompany
+from sales.models.models_single_company import GlassProcessingSalesSingleCompany
 
 
 # 假设直接从数据库获取数据
